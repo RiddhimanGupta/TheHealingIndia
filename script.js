@@ -159,12 +159,22 @@ let srchTimer     = null;
 /* =======================================================
    SPLASH → APP
 ======================================================= */
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Force the splash screen to disappear after 1 second max
   setTimeout(() => {
-    document.getElementById('splash').classList.add('out');
-    document.getElementById('app').classList.add('show');
-    initCrashDetection();
-  }, 2300);
+    const splash = document.getElementById('splash');
+    const app = document.getElementById('app');
+    
+    if (splash) splash.classList.add('out');
+    if (app) app.classList.add('show');
+    
+    // 2. Initialize the crash detection sensors
+    try {
+      initCrashDetection();
+    } catch (err) {
+      console.log("Sensor init delayed:", err);
+    }
+  }, 1000); 
 });
 
 /* =======================================================
