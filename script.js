@@ -175,6 +175,11 @@ function go(tab) {
   document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
   document.getElementById('screen-' + tab).classList.add('on');
   document.getElementById('ni-' + tab).classList.add('on');
+  
+  // Ensure navbar reappears instantly when changing tabs
+  const nav = document.querySelector('nav');
+  if(nav) nav.classList.remove('nav-hidden'); 
+  
   if (tab === 'maps' && !mapInited) initMap();
 }
 
@@ -298,21 +303,31 @@ function disputeIt(id) { toast('📝 Dispute filed for ' + id + '. You will be n
 function initMap() {
   mapInited = true;
 
+  // Restrict map panning to India to prevent endless scrolling/looping
+  const indiaBounds = L.latLngBounds(
+    [6.4626, 68.1097], // South-West
+    [35.5133, 97.3953] // North-East
+  );
+
   leafletMap = L.map('leaflet-map', {
-    center: [19.0760, 72.8777],
+    center: [28.6692, 77.4538], // Centered directly on Ghaziabad / Delhi NCR
     zoom: 14,
+    minZoom: 5, // Prevents zooming out to see the whole earth
+    maxBounds: indiaBounds,
+    maxBoundsViscosity: 1.0, // Creates a hard bounce when hitting the edge
     zoomControl: true,
     attributionControl: true
   });
 
-  // CartoDB Dark Matter tiles (OpenStreetMap-based, free, looks premium)
+  // Added detectRetina for sharper graphics and noWrap to stop the map from repeating
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
     subdomains: 'abcd',
-    maxZoom: 19
+    maxZoom: 19,
+    noWrap: true, // This explicitly stops the looping issue
+    detectRetina: true // This fixes the "nasty" low-res image scaling
   }).addTo(leafletMap);
 
-  // Reposition zoom to bottom-right away from our UI
   leafletMap.zoomControl.setPosition('bottomright');
 
   // Try to get user location
@@ -636,3 +651,28 @@ function toast(msg) {
   el.classList.add('show');
   toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
 }
+
+/* =======================================================
+   SMART SCROLL NAVBAR LOGIC
+======================================================= */
+const navbar = document.querySelector('nav');
+let lastScrollY = 0;
+
+// Attach scroll listeners to all scrollable screens
+document.querySelectorAll('.screen').forEach(screen => {
+  screen.addEventListener('scroll', (e) => {
+    const currentScrollY = e.target.scrollTop;
+
+    // Ignore tiny accidental scrolls (less than 10px) to prevent jitter
+    if (Math.abs(currentScrollY - lastScrollY) < 10) return;
+
+    // If scrolling down AND past the top 50px of the screen
+    if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      navbar.classList.add('nav-hidden'); // Hide it
+    } else {
+      navbar.classList.remove('nav-hidden'); // Show it
+    }
+
+    lastScrollY = currentScrollY;
+  }, { passive: true });
+});
