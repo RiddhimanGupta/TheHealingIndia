@@ -1,97 +1,84 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THI — The Healing India</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header class="hero">
-        <div class="container">
-            <h1>THI — The Healing India [cite: 1]</h1>
-            <p class="tagline">A Safety Companion App for India's Delivery Riders [cite: 2]</p>
-            <p class="subtitle">National Road Safety Hackathon 2026 | CoERS, RBG Labs, IIT Madras [cite: 3]</p>
-        </div>
-    </header>
-
-    <main class="container">
+<main class="container">
         <section id="problem" class="card">
-            <h2>The Problem I Am Solving [cite: 5]</h2>
-            <p>India's food delivery industry runs on the backs of over 12 million gig workers[cite: 6]. In 2023, 75,000 two-wheeler riders died on Indian roads — that is 9 deaths every single hour[cite: 8].</p>
-            <p>The pressure of platform-driven delivery deadlines creates a system where riders are algorithmically incentivised to speed and take risks[cite: 11]. THI aims to protect these riders, who are the most vulnerable people on Indian roads[cite: 7].</p>
+            <h2>The Problem I Am Solving</h2>
+            <p>India's food delivery industry runs on the backs of over 12 million gig workers. In 2023, 75,000 two-wheeler riders died on Indian roads — that is 9 deaths every single hour.</p>
+            <p>The pressure of platform-driven delivery deadlines creates a system where riders are algorithmically incentivised to speed and take risks. THI aims to protect these riders, who are the most vulnerable people on Indian roads.</p>
         </section>
 
         <section id="solution" class="card">
-            <h2>What THI Is [cite: 15]</h2>
-            <p>THI is a lightweight Android background service that runs alongside Google Maps[cite: 16]. It does not replace Google Maps; it works silently in the background, providing legal protection, emergency response, and road intelligence without interrupting the rider's workflow[cite: 14, 17]. It requires no extra hardware, just the smartphone the rider already carries[cite: 18].</p>
+            <h2>What THI Is</h2>
+            <p>THI is a lightweight Android background service that runs alongside Google Maps. It does not replace Google Maps; it works silently in the background, providing legal protection, emergency response, and road intelligence without interrupting the rider's workflow. It requires no extra hardware, just the smartphone the rider already carries.</p>
         </section>
 
-        <section id="features">
-            <h2>Core Features [cite: 21]</h2>
+        <section id="prototype" class="card feature-highlight">
+            <h2>Live Prototype Dashboard</h2>
+            <p class="subtitle">Interact with the modules below to simulate the background service logic.</p>
+            
             <div class="grid">
-                <div class="feature-card">
-                    <h3>DriveLegal [cite: 22]</h3>
-                    <p>Provides subtle audio alerts when approaching known challan-prone zones[cite: 23, 24]. Riders can also check their challan status pulled from the Vahan database[cite: 26].</p>
+                <div class="feature-card interactive">
+                    <h3>⚖️ DriveLegal Status</h3>
+                    <p>Check pending challans via Vahan DB.</p>
+                    <div class="input-group">
+                        <input type="text" id="plateInput" placeholder="e.g., UP-14-XX-9999" class="app-input">
+                        <button onclick="checkVahan()" class="app-btn">Check Status</button>
+                    </div>
+                    <div id="vahanResult" class="result-box hidden"></div>
                 </div>
-                <div class="feature-card">
-                    <h3>RoadWatch [cite: 28]</h3>
-                    <p>Uses the phone's accelerometer to detect potholes[cite: 29]. Confirmed reports are stored in a community database to build a verified hazard map[cite: 32].</p>
+
+                <div class="feature-card interactive">
+                    <h3>🚧 RoadWatch Hazard Log</h3>
+                    <p>Simulate a sensor-detected accelerometer jolt.</p>
+                    <button onclick="simulatePothole()" class="app-btn warning-btn">Simulate Pothole Detection</button>
+                    <ul id="hazardLog" class="log-list">
+                        </ul>
                 </div>
-                <div class="feature-card">
-                    <h3>RoadSoS [cite: 33]</h3>
-                    <p>Detects potential crashes using sudden drops in GPS speed and sharp accelerometer impacts[cite: 34, 35]. A 10-second alert window triggers [cite: 36]; if unresponsive, it sends emergency alerts to the nearest hospital and police station via the Overpass API[cite: 37].</p>
+
+                <div class="feature-card interactive">
+                    <h3>🚨 RoadSoS Crash Alert</h3>
+                    <p>Simulate a sudden GPS stop + high impact.</p>
+                    <button onclick="triggerCrash()" class="app-btn danger-btn">Simulate Crash Event</button>
                 </div>
             </div>
         </section>
 
-        <section id="dashboard" class="card">
-            <h2>The Rider Dashboard [cite: 39]</h2>
-            <p>Designed to be glanced at between deliveries[cite: 41]:</p>
-            <ul>
-                <li><strong>Today's Route Map:</strong> A map overlay colour-coded by speed zone and challan risk[cite: 42].</li>
-                <li><strong>Challan Zone Crossings:</strong> Logged time and location for personal evidence[cite: 43].</li>
-                <li><strong>Road Hazards Reported:</strong> Verification status of bad road stretches[cite: 45].</li>
-            </ul>
-        </section>
+        <div id="sosModal" class="modal hidden">
+            <div class="modal-content">
+                <h2 class="sos-title">CRASH DETECTED</h2>
+                <p>Are you safe? Auto-alerting emergency contacts and nearest hospital in:</p>
+                <div class="countdown" id="sosTimer">10</div>
+                <button onclick="cancelSos()" class="app-btn safe-btn">I AM SAFE (Cancel)</button>
+            </div>
+        </div>
 
         <section id="impact" class="card">
-            <h2>Real-World Impact [cite: 58]</h2>
+            <h2>Real-World Impact</h2>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Problem [cite: 59]</th>
-                            <th>Who It Affects [cite: 59]</th>
-                            <th>How THI Helps [cite: 59]</th>
+                            <th>Problem</th>
+                            <th>Who It Affects</th>
+                            <th>How THI Helps</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Challans from unknowing entry into enforcement zones [cite: 59]</td>
-                            <td>All delivery riders [cite: 59]</td>
-                            <td>Audio zone alerts before entry [cite: 59]</td>
+                            <td>Challans from unknowing entry into enforcement zones</td>
+                            <td>All delivery riders</td>
+                            <td>Audio zone alerts before entry</td>
                         </tr>
                         <tr>
-                            <td>No emergency response when a rider crashes alone [cite: 59]</td>
-                            <td>Solo riders on night shifts [cite: 59]</td>
-                            <td>Automatic SOS to hospital + police [cite: 59]</td>
+                            <td>No emergency response when a rider crashes alone</td>
+                            <td>Solo riders on night shifts</td>
+                            <td>Automatic SOS to hospital + police</td>
                         </tr>
                         <tr>
-                            <td>Potholes causing accidents at night [cite: 59]</td>
-                            <td>All riders, especially monsoon season [cite: 59]</td>
-                            <td>Community-verified hazard map [cite: 59]</td>
+                            <td>Potholes causing accidents at night</td>
+                            <td>All riders, especially monsoon season</td>
+                            <td>Community-verified hazard map</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </section>
     </main>
-
-    <footer>
-        <p>Built for the National Road Safety Hackathon 2026 [cite: 61]</p>
-    </footer>
-
-    <script src="script.js"></script>
-</body>
-</html>
