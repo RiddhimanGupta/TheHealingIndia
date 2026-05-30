@@ -26,30 +26,84 @@ body {
     padding: 0 20px;
 }
 
+.main-content {
+    min-height: 60vh; /* Keeps footer pushed down even if tab has little content */
+}
+
+/* --- Hero & Navigation --- */
 .hero {
     background: linear-gradient(135deg, #2c3e50, #000000);
-    padding: 60px 0;
+    padding: 40px 0 0 0;
     text-align: center;
-    border-bottom: 3px solid var(--accent);
 }
 
 .hero h1 {
     font-size: 2.5rem;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     color: var(--accent);
 }
 
 .tagline {
     font-size: 1.2rem;
     font-weight: 500;
+    margin-bottom: 30px;
 }
 
-.subtitle {
+.navbar {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-top: 1px solid #333;
+    border-bottom: 3px solid var(--accent);
+    backdrop-filter: blur(5px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 0;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
     color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-top: 15px;
+    padding: 15px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
 }
 
+.nav-btn:hover {
+    color: var(--text-main);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.active-nav {
+    color: var(--accent);
+    border-bottom: 3px solid var(--accent);
+}
+
+/* --- Tab Logic --- */
+.tab-content {
+    display: none; /* Hide all tabs by default */
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.active-tab {
+    display: block; /* Show only the active tab */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Sections & Cards --- */
 section {
     margin: 40px 0;
 }
@@ -91,6 +145,23 @@ h3 {
     transform: translateY(-5px);
 }
 
+/* --- Map & Tables --- */
+.map-wrapper {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+    margin-bottom: 20px;
+}
+
+#map {
+    width: 100%;
+    height: 350px;
+    border-radius: 4px;
+    margin-top: 15px;
+    background-color: #222; 
+}
+
 .table-container {
     overflow-x: auto;
 }
@@ -121,25 +192,9 @@ footer {
     margin-top: 40px;
 }
 
-/* --- Interactive Prototype Styles --- */
+/* --- Interactive Elements --- */
 .feature-highlight {
     border-top: 4px solid var(--accent);
-}
-
-.map-wrapper {
-    background-color: var(--card-bg);
-    padding: 20px;
-    border-radius: 8px;
-    border-left: 4px solid #3498db;
-    margin-bottom: 20px;
-}
-
-#map {
-    width: 100%;
-    height: 350px;
-    border-radius: 4px;
-    margin-top: 15px;
-    background-color: #222; /* Placeholder color before map loads */
 }
 
 .interactive {
@@ -195,10 +250,9 @@ footer {
 
 .result-box.clear { border-left: 4px solid #2ecc71; }
 .result-box.alert { border-left: 4px solid #e74c3c; }
-
 .hidden { display: none !important; }
 
-/* --- SOS Modal Styles --- */
+/* --- SOS Modal --- */
 .modal {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -230,32 +284,10 @@ footer {
    LAPTOP / DESKTOP COMPATIBILITY RULES
    ========================================= */
 @media (min-width: 768px) {
-    .hero {
-        padding: 100px 0; 
-    }
-
-    .hero h1 {
-        font-size: 3.5rem; 
-    }
-    
-    .subtitle {
-        font-size: 1rem;
-    }
-
-    section {
-        margin: 60px 0; 
-    }
-
-    .grid {
-        grid-template-columns: repeat(2, 1fr); /* Split perfectly into 2 columns now */
-    }
-
-    .input-group {
-        flex-direction: row; 
-    }
-    
-    .modal-content {
-        padding: 60px;
-        min-width: 500px; 
-    }
+    .hero { padding: 60px 0 0 0; }
+    .hero h1 { font-size: 3.5rem; }
+    section { margin: 60px 0; }
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .input-group { flex-direction: row; }
+    .modal-content { padding: 60px; min-width: 500px; }
 }
