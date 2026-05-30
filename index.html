@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THI — The Healing India</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header class="hero">
@@ -12,37 +12,106 @@
             <h1>THI — The Healing India</h1>
             <p class="tagline">A Safety Companion App for India's Delivery Riders</p>
         </div>
+        
+        <nav class="navbar">
+            <div class="container nav-container">
+                <button class="nav-btn active-nav" onclick="switchTab('home-tab', this)">Home</button>
+                <button class="nav-btn" onclick="switchTab('features-tab', this)">Live Dashboard</button>
+                <button class="nav-btn" onclick="switchTab('about-tab', this)">About Us</button>
+            </div>
+        </nav>
     </header>
 
-    <main class="container">
-        <section id="prototype" class="card feature-highlight">
-            <h2>Live Prototype Dashboard</h2>
-            <p class="subtitle">Interact with the modules below to simulate the background service logic.</p>
-            
-            <div class="map-wrapper">
-                <h3>📍 Live Rider Tracking & Challan Zones</h3>
-                <p>Simulated rider view tracking enforcement zones in real-time.</p>
-                <div id="map"></div>
-            </div>
+    <main class="container main-content">
+        
+        <div id="home-tab" class="tab-content active-tab">
+            <section id="problem" class="card">
+                <h2>The Problem I Am Solving</h2>
+                <p>India's food delivery industry runs on the backs of over 12 million gig workers. In 2023, 75,000 two-wheeler riders died on Indian roads — that is 9 deaths every single hour.</p>
+                <p>The pressure of platform-driven delivery deadlines creates a system where riders are algorithmically incentivised to speed and take risks. THI aims to protect these riders, who are the most vulnerable people on Indian roads.</p>
+            </section>
 
-            <div class="grid">
-                <div class="feature-card interactive">
-                    <h3>⚖️ DriveLegal Status</h3>
-                    <p>Check pending challans via Vahan DB.</p>
-                    <div class="input-group">
-                        <input type="text" id="plateInput" placeholder="e.g., UP-14-XX-9999" class="app-input">
-                        <button onclick="checkVahan()" class="app-btn">Check Status</button>
+            <section id="solution" class="card">
+                <h2>What THI Is</h2>
+                <p>THI is a lightweight Android background service that runs alongside Google Maps. It works silently in the background, providing legal protection and emergency response without interrupting the rider's workflow. It requires no extra hardware, just the smartphone the rider already carries.</p>
+            </section>
+
+            <section id="impact" class="card">
+                <h2>Real-World Impact</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Problem</th>
+                                <th>Who It Affects</th>
+                                <th>How THI Helps</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Challans from unknowing entry into enforcement zones</td>
+                                <td>All delivery riders</td>
+                                <td>Audio zone alerts before entry</td>
+                            </tr>
+                            <tr>
+                                <td>No emergency response when a rider crashes alone</td>
+                                <td>Solo riders on night shifts</td>
+                                <td>Automatic SOS to hospital + police</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <div id="features-tab" class="tab-content">
+            <section id="prototype" class="card feature-highlight">
+                <h2>Live Prototype Dashboard</h2>
+                <p class="subtitle">Interact with the modules below to simulate the background service logic.</p>
+                
+                <div class="map-wrapper">
+                    <h3>📍 Live Rider Tracking & Challan Zones</h3>
+                    <p>Simulated rider view tracking enforcement zones in real-time.</p>
+                    <div id="map"></div>
+                </div>
+
+                <div class="grid">
+                    <div class="feature-card interactive">
+                        <h3>⚖️ DriveLegal Status</h3>
+                        <p>Check pending challans via Vahan DB.</p>
+                        <div class="input-group">
+                            <input type="text" id="plateInput" placeholder="e.g., UP-14-XX-9999" class="app-input">
+                            <button onclick="checkVahan()" class="app-btn">Check Status</button>
+                        </div>
+                        <div id="vahanResult" class="result-box hidden"></div>
                     </div>
-                    <div id="vahanResult" class="result-box hidden"></div>
-                </div>
 
-                <div class="feature-card interactive">
-                    <h3>🚨 RoadSoS Crash Alert</h3>
-                    <p>Simulate a sudden GPS stop + high impact.</p>
-                    <button onclick="triggerCrash()" class="app-btn danger-btn">Simulate Crash Event</button>
+                    <div class="feature-card interactive">
+                        <h3>🚨 RoadSoS Crash Alert</h3>
+                        <p>Simulate a sudden GPS stop + high impact.</p>
+                        <button onclick="triggerCrash()" class="app-btn danger-btn">Simulate Crash Event</button>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
+
+        <div id="about-tab" class="tab-content">
+            <section class="card">
+                <h2>About The Project</h2>
+                <p><strong>THI (The Healing India)</strong> was developed as a submission for the <strong>National Road Safety Hackathon 2026</strong>, hosted by CoERS and RBG Labs at IIT Madras.</p>
+                
+                <h3 style="margin-top: 20px;">The Vision</h3>
+                <p>The goal is simple: to deploy a zero-friction safety layer across India's 12 million delivery riders. By building a software-only solution that piggybacks on the tools riders already use (like Google Maps), we bypass the adoption hurdles of expensive hardware and standalone apps.</p>
+                
+                <h3 style="margin-top: 20px;">The Tech Stack</h3>
+                <ul>
+                    <li><strong>Frontend UI:</strong> HTML5, CSS3, Vanilla JavaScript</li>
+                    <li><strong>Mapping:</strong> Google Maps JavaScript API</li>
+                    <li><strong>Core Services (Proposed):</strong> Android FusedLocationProvider, SensorManager API, Overpass API (Emergency Routing)</li>
+                </ul>
+            </section>
+        </div>
+
     </main>
 
     <div id="sosModal" class="modal hidden">
@@ -55,7 +124,7 @@
     </div>
 
     <footer>
-        <p>Made by Riddhiman, Darshit, Divij & Ashita</p>
+        <p>Built for the National Road Safety Hackathon 2026</p>
     </footer>
 
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE&callback=initMap" async defer></script>
