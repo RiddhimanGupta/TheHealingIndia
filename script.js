@@ -1,133 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THI — The Healing India</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <header class="hero">
-        <div class="container">
-            <h1>THI — The Healing India</h1>
-            <p class="tagline">A Safety Companion App for India's Delivery Riders</p>
-        </div>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("THI SPA Dashboard Initialized.");
+});
+
+// --- Tab Navigation Logic ---
+let mapHasRendered = false; // Flag to fix Google Maps display glitch
+
+function switchTab(tabId, btnElement) {
+    // 1. Hide all tabs
+    const tabs = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+        tab.classList.remove('active-tab');
+    });
+
+    // 2. Remove active state from all buttons
+    const btns = document.querySelectorAll('.nav-btn');
+    btns.forEach(btn => {
+        btn.classList.remove('active-nav');
+    });
+
+    // 3. Show the selected tab and highlight the button
+    document.getElementById(tabId).classList.add('active-tab');
+    btnElement.classList.add('active-nav');
+
+    // 4. Google Maps Fix: If switching to features tab, nudge the map so it doesn't render grey
+    if (tabId === 'features-tab' && !mapHasRendered && window.google) {
+        setTimeout(() => {
+            google.maps.event.trigger(map, 'resize');
+            map.setCenter({ lat: 28.6692, lng: 77.4538 });
+            mapHasRendered = true;
+        }, 100);
+    }
+}
+
+// --- Feature 0: Google Maps Initialization ---
+let map;
+function initMap() {
+    // Center map around Ghaziabad / Delhi NCR region
+    const centerLocation = { lat: 28.6692, lng: 77.4538 };
+
+    const darkMapStyle = [
+        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+        { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
+    ];
+
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: centerLocation,
+        zoom: 12,
+        styles: darkMapStyle,
+        disableDefaultUI: true 
+    });
+
+    // Mock a Rider Location Marker
+    new google.maps.Marker({
+        position: centerLocation,
+        map: map,
+        title: "Rider Current Location",
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: "#3498db",
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: "#ffffff"
+        }
+    });
+
+    // Mock an active "Challan Enforcement Zone"
+    new google.maps.Circle({
+        strokeColor: "#e74c3c",
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: "#e74c3c",
+        fillOpacity: 0.35,
+        map: map,
+        center: { lat: 28.6750, lng: 77.4300 },
+        radius: 1500 
+    });
+}
+
+// --- Feature 1: DriveLegal (Vahan DB Mock) ---
+function checkVahan() {
+    const input = document.getElementById('plateInput').value.toUpperCase().trim();
+    const resultBox = document.getElementById('vahanResult');
+    
+    if (!input) return;
+
+    resultBox.classList.remove('hidden', 'clear', 'alert');
+    resultBox.innerHTML = "Querying MoRTH database...";
+
+    setTimeout(() => {
+        if (input.includes('UP14') || input.includes('DL') || input.includes('UP-14')) {
+            resultBox.classList.add('alert');
+            resultBox.innerHTML = `<strong>Status: Action Required</strong><br>1 Pending Challan found for ${input}.<br>Offense: Stop line violation at Mohan Nagar intersection.`;
+        } else {
+            resultBox.classList.add('clear');
+            resultBox.innerHTML = `<strong>Status: Clear</strong><br>No pending challans found for ${input}. Drive safely!`;
+        }
+    }, 800);
+}
+
+// --- Feature 2: RoadSoS (Crash Modal Mock) ---
+let sosInterval;
+let timeLeft = 10;
+
+function triggerCrash() {
+    const modal = document.getElementById('sosModal');
+    const timerDisplay = document.getElementById('sosTimer');
+    
+    timeLeft = 10;
+    timerDisplay.innerText = timeLeft;
+    timerDisplay.style.color = "white";
+    document.querySelector('.sos-title').innerText = "CRASH DETECTED";
+    
+    modal.classList.remove('hidden');
+    
+    sosInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.innerText = timeLeft;
         
-        <nav class="navbar">
-            <div class="container nav-container">
-                <button class="nav-btn active-nav" onclick="switchTab('home-tab', this)">Home</button>
-                <button class="nav-btn" onclick="switchTab('features-tab', this)">Live Dashboard</button>
-                <button class="nav-btn" onclick="switchTab('about-tab', this)">About Us</button>
-            </div>
-        </nav>
-    </header>
+        if (timeLeft <= 0) {
+            clearInterval(sosInterval);
+            timerDisplay.innerText = "ALERTS DEPLOYED";
+            timerDisplay.style.color = "#e74c3c";
+            document.querySelector('.sos-title').innerText = "EMERGENCY PROTOCOL ACTIVE";
+            
+            setTimeout(() => {
+                cancelSos();
+                alert("Demo Note: Overpass API payload sent to nearest hospital and emergency contacts via background SMS.");
+            }, 3000);
+        }
+    }, 1000);
+}
 
-    <main class="container main-content">
-        
-        <div id="home-tab" class="tab-content active-tab">
-            <section id="problem" class="card">
-                <h2>The Problem I Am Solving</h2>
-                <p>India's food delivery industry runs on the backs of over 12 million gig workers. In 2023, 75,000 two-wheeler riders died on Indian roads — that is 9 deaths every single hour.</p>
-                <p>The pressure of platform-driven delivery deadlines creates a system where riders are algorithmically incentivised to speed and take risks. THI aims to protect these riders, who are the most vulnerable people on Indian roads.</p>
-            </section>
-
-            <section id="solution" class="card">
-                <h2>What THI Is</h2>
-                <p>THI is a lightweight Android background service that runs alongside Google Maps. It works silently in the background, providing legal protection and emergency response without interrupting the rider's workflow. It requires no extra hardware, just the smartphone the rider already carries.</p>
-            </section>
-
-            <section id="impact" class="card">
-                <h2>Real-World Impact</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Problem</th>
-                                <th>Who It Affects</th>
-                                <th>How THI Helps</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Challans from unknowing entry into enforcement zones</td>
-                                <td>All delivery riders</td>
-                                <td>Audio zone alerts before entry</td>
-                            </tr>
-                            <tr>
-                                <td>No emergency response when a rider crashes alone</td>
-                                <td>Solo riders on night shifts</td>
-                                <td>Automatic SOS to hospital + police</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </div>
-
-        <div id="features-tab" class="tab-content">
-            <section id="prototype" class="card feature-highlight">
-                <h2>Live Prototype Dashboard</h2>
-                <p class="subtitle">Interact with the modules below to simulate the background service logic.</p>
-                
-                <div class="map-wrapper">
-                    <h3>📍 Live Rider Tracking & Challan Zones</h3>
-                    <p>Simulated rider view tracking enforcement zones in real-time.</p>
-                    <div id="map"></div>
-                </div>
-
-                <div class="grid">
-                    <div class="feature-card interactive">
-                        <h3>⚖️ DriveLegal Status</h3>
-                        <p>Check pending challans via Vahan DB.</p>
-                        <div class="input-group">
-                            <input type="text" id="plateInput" placeholder="e.g., UP-14-XX-9999" class="app-input">
-                            <button onclick="checkVahan()" class="app-btn">Check Status</button>
-                        </div>
-                        <div id="vahanResult" class="result-box hidden"></div>
-                    </div>
-
-                    <div class="feature-card interactive">
-                        <h3>🚨 RoadSoS Crash Alert</h3>
-                        <p>Simulate a sudden GPS stop + high impact.</p>
-                        <button onclick="triggerCrash()" class="app-btn danger-btn">Simulate Crash Event</button>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <div id="about-tab" class="tab-content">
-            <section class="card">
-                <h2>About The Project</h2>
-                <p><strong>THI (The Healing India)</strong> was developed as a submission for the <strong>National Road Safety Hackathon 2026</strong>, hosted by CoERS and RBG Labs at IIT Madras.</p>
-                
-                <h3 style="margin-top: 20px;">The Vision</h3>
-                <p>The goal is simple: to deploy a zero-friction safety layer across India's 12 million delivery riders. By building a software-only solution that piggybacks on the tools riders already use (like Google Maps), we bypass the adoption hurdles of expensive hardware and standalone apps.</p>
-                
-                <h3 style="margin-top: 20px;">The Tech Stack</h3>
-                <ul>
-                    <li><strong>Frontend UI:</strong> HTML5, CSS3, Vanilla JavaScript</li>
-                    <li><strong>Mapping:</strong> Google Maps JavaScript API</li>
-                    <li><strong>Core Services (Proposed):</strong> Android FusedLocationProvider, SensorManager API, Overpass API (Emergency Routing)</li>
-                </ul>
-            </section>
-        </div>
-
-    </main>
-
-    <div id="sosModal" class="modal hidden">
-        <div class="modal-content">
-            <h2 class="sos-title">CRASH DETECTED</h2>
-            <p>Are you safe? Auto-alerting emergency contacts and nearest hospital in:</p>
-            <div class="countdown" id="sosTimer">10</div>
-            <button onclick="cancelSos()" class="app-btn safe-btn">I AM SAFE (Cancel)</button>
-        </div>
-    </div>
-
-    <footer>
-        <p>Built for the National Road Safety Hackathon 2026</p>
-    </footer>
-
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE&callback=initMap" async defer></script>
-    <script src="script.js"></script>
-</body>
-</html>
+function cancelSos() {
+    const modal = document.getElementById('sosModal');
+    modal.classList.add('hidden');
+    clearInterval(sosInterval);
+}
