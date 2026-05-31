@@ -1,5 +1,5 @@
 /* ===================================================
-   DESIGN SYSTEM
+   THI — THE HEALING INDIA | DESIGN SYSTEM
 =================================================== */
 :root {
   --bg:        #070b18;
@@ -40,9 +40,7 @@ html, body {
   -moz-osx-font-smoothing:grayscale;
 }
 
-/* ===================================================
-   SPLASH
-=================================================== */
+/* ===================== SPLASH ===================== */
 #splash {
   position:fixed; inset:0; z-index:9999;
   background:radial-gradient(ellipse at 30% 40%, #1a0e2e 0%, #070b18 55%, #0d1528 100%);
@@ -56,11 +54,10 @@ html, body {
   background:linear-gradient(135deg,#ff6b35 0%,#ff4757 60%,#c0392b 100%);
   border-radius:26px;
   display:flex; align-items:center; justify-content:center;
-  font-family:'Outfit',sans-serif; font-size:32px; font-weight:900; color:#fff;
+  font-family:'Outfit',sans-serif; font-size:28px; font-weight:900; color:#fff;
   box-shadow:0 0 0 12px rgba(255,107,53,.1), 0 0 60px rgba(255,107,53,.4);
   animation:logoBreath 2.2s ease-in-out infinite;
-  margin-bottom:22px;
-  letter-spacing:-1px;
+  margin-bottom:22px; letter-spacing:-1px;
 }
 @keyframes logoBreath {
   0%,100%{box-shadow:0 0 0 12px rgba(255,107,53,.1),0 0 50px rgba(255,107,53,.35);}
@@ -73,18 +70,14 @@ html, body {
 .sp-fill  { height:100%; width:0; background:linear-gradient(90deg,#ff6b35,#ff4757); border-radius:99px; animation:barFill 2s var(--ease) forwards; }
 @keyframes barFill { to { width:100%; } }
 
-/* ===================================================
-   APP SHELL
-=================================================== */
+/* ===================== APP SHELL ===================== */
 #app {
   display:flex; flex-direction:column; height:100vh;
   opacity:0; transition:opacity .55s var(--ease);
 }
 #app.show { opacity:1; }
 
-/* ===================================================
-   HEADER
-=================================================== */
+/* ===================== HEADER ===================== */
 header {
   height:var(--hdr-h); flex-shrink:0;
   background:rgba(7,11,24,.97);
@@ -99,7 +92,7 @@ header {
   background:linear-gradient(135deg,#ff6b35,#ff4757);
   border-radius:10px;
   display:flex; align-items:center; justify-content:center;
-  font-family:'Outfit',sans-serif; font-size:11px; font-weight:900; color:#fff; letter-spacing:-.5px;
+  font-family:'Outfit',sans-serif; font-size:10px; font-weight:900; color:#fff; letter-spacing:-.3px;
 }
 .h-name { font-family:'Outfit',sans-serif; font-size:17px; font-weight:700; }
 .h-name em { color:var(--accent); font-style:normal; }
@@ -113,9 +106,7 @@ header {
 .pdot { width:6px; height:6px; border-radius:50%; background:currentColor; animation:blink 2s infinite; }
 @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.35;} }
 
-/* ===================================================
-   SCREENS
-=================================================== */
+/* ===================== SCREENS ===================== */
 #screens { flex:1; position:relative; overflow:hidden; }
 
 .screen {
@@ -134,9 +125,7 @@ header {
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:rgba(255,255,255,.08); border-radius:99px; }
 
-/* ===================================================
-   BOTTOM NAV
-=================================================== */
+/* ===================== BOTTOM NAV ===================== */
 nav {
   position:fixed; bottom:0; left:0; right:0;
   height:var(--nav-h);
@@ -144,9 +133,8 @@ nav {
   backdrop-filter:blur(30px);
   border-top:1px solid var(--border);
   display:flex; z-index:300;
-  transition: transform 0.4s var(--ease); 
+  transition: transform 0.4s var(--ease);
 }
-
 nav.nav-hidden {
   transform: translateY(100%);
 }
@@ -154,15 +142,12 @@ nav.nav-hidden {
 .ni {
   flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
   cursor:pointer; border:none; background:transparent; color:var(--t3);
-  transition:all var(--dur) var(--ease); position:relative;
-  padding:0;
+  transition:all var(--dur) var(--ease); position:relative; padding:0;
 }
-
 .ni:hover { 
   color:var(--t1); 
   background: linear-gradient(to top, rgba(255,107,53,0.08), transparent);
 }
-
 .ni.on { color:var(--accent); }
 .ni.on::after {
   content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);
@@ -174,9 +159,7 @@ nav.nav-hidden {
 .ni.on svg { transform:scale(1.12); }
 .ni span { font-size:10.5px; font-weight:600; letter-spacing:.4px; }
 
-/* ===================================================
-   SHARED COMPONENTS
-=================================================== */
+/* ===================== SHARED COMPONENTS ===================== */
 .sec-label {
   font-family:'Outfit',sans-serif; font-size:15px; font-weight:700;
   margin:22px 16px 12px;
@@ -204,12 +187,9 @@ nav.nav-hidden {
 .btn-red   { background:rgba(255,71,87,.12); color:var(--red); border:1px solid rgba(255,71,87,.2); }
 .btn-green { background:rgba(0,230,118,.1); color:var(--green); border:1px solid rgba(0,230,118,.18); }
 
-/* ===================================================
-   DASHBOARD
-=================================================== */
+/* ===================== DASHBOARD ===================== */
 .db-hero {
-  margin:16px 16px 0;
-  padding:24px 22px;
+  margin:16px 16px 0; padding:24px 22px;
   background:linear-gradient(130deg,#c0392b 0%,#ff6b35 45%,#e8505b 100%);
   border-radius:20px; position:relative; overflow:hidden;
 }
@@ -237,8 +217,7 @@ nav.nav-hidden {
 .alert-card {
   margin:0 16px; border-radius:16px;
   background:rgba(0,212,170,.06); border:1px solid rgba(0,212,170,.18);
-  padding:15px 18px;
-  display:flex; align-items:center; gap:15px;
+  padding:15px 18px; display:flex; align-items:center; gap:15px;
 }
 .ac-ico {
   width:46px; height:46px; flex-shrink:0;
@@ -260,12 +239,10 @@ nav.nav-hidden {
 .qa-btn:hover { background:rgba(255,255,255,.07); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.3); }
 .qa-btn:active { transform:translateY(0); }
 .qa-ico { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
-.qa-t  { font-size:13px; font-weight:600; }
-.qa-s  { font-size:11px; color:var(--t2); margin-top:2px; }
+.qa-t  { font-size:13px; font-weight:600; text-align:left; }
+.qa-s  { font-size:11px; color:var(--t2); margin-top:2px; text-align:left; }
 
-/* ===================================================
-   CHALLAN SCREEN
-=================================================== */
+/* ===================== CHALLAN SCREEN ===================== */
 .ch-hdr { padding:18px 16px 0; }
 .ch-ttl { font-family:'Outfit',sans-serif; font-size:22px; font-weight:800; margin-bottom:5px; }
 .ch-sub { font-size:13px; color:var(--t2); margin-bottom:18px; }
@@ -307,6 +284,12 @@ nav.nav-hidden {
 
 /* Vehicle result */
 #ch-result { margin:0 16px; }
+.load-spin {
+  display:inline-block; width:30px; height:30px;
+  border:3px solid var(--border); border-top-color:var(--accent);
+  border-radius:50%; animation:spin 1s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
 
 .veh-card { border-radius:20px; overflow:hidden; margin-bottom:14px; }
 .veh-banner { height:145px; display:flex; align-items:center; justify-content:center; position:relative; }
@@ -350,31 +333,19 @@ nav.nav-hidden {
 .no-res-t   { font-size:15px; font-weight:600; margin-bottom:6px; color:var(--t2); }
 .no-res-s   { font-size:13px; color:var(--t3); line-height:1.6; }
 
-/* ===================================================
-   MAPS SCREEN
-=================================================== */
+/* ===================== MAPS SCREEN ===================== */
 .map-wrap { position:relative; height:100%; }
-
 #leaflet-map { width:100%; height:100%; z-index:1; }
 
-/* Override leaflet defaults */
-.leaflet-control-zoom {
-  border:none !important;
-  box-shadow:none !important;
-}
+/* Leaflet overrides */
+.leaflet-control-zoom { border:none !important; box-shadow:none !important; }
 .leaflet-control-zoom a {
-  background:rgba(13,21,40,.92) !important;
-  backdrop-filter:blur(12px) !important;
-  border:1px solid var(--border2) !important;
-  color:var(--t1) !important;
-  border-radius:10px !important;
-  margin-bottom:4px !important;
-  width:34px !important; height:34px !important;
-  line-height:34px !important;
-  font-size:18px !important;
-  text-decoration:none !important;
-  display:flex !important; align-items:center !important; justify-content:center !important;
-  transition:background var(--dur) !important;
+  background:rgba(13,21,40,.92) !important; backdrop-filter:blur(12px) !important;
+  border:1px solid var(--border2) !important; color:var(--t1) !important;
+  border-radius:10px !important; margin-bottom:4px !important;
+  width:34px !important; height:34px !important; line-height:34px !important;
+  font-size:18px !important; display:flex !important; align-items:center !important;
+  justify-content:center !important; transition:background var(--dur) !important; text-decoration:none !important;
 }
 .leaflet-control-zoom a:hover { background:rgba(255,107,53,.2) !important; color:var(--accent) !important; }
 .leaflet-attribution-flag { display:none !important; }
@@ -391,14 +362,17 @@ nav.nav-hidden {
 
 /* Map UI Overlay */
 .map-ui {
-  position:absolute; inset:0; z-index:10; pointer-events:none;
+  position:absolute; inset:0; z-index:10;
+  pointer-events:none;
   display:flex; flex-direction:column;
 }
 
-/* Search row */
+/* Search bar */
 .map-srch-row {
-  display:flex; gap:9px; align-items:stretch;
-  padding:12px 12px 0; pointer-events:all; position:relative;
+  display:flex; gap:9px; align-items:center;
+  padding:12px 12px 0;
+  pointer-events:all;
+  position:relative;
 }
 .map-srch-box {
   flex:1; display:flex; align-items:center; gap:10px;
@@ -416,7 +390,7 @@ nav.nav-hidden {
   background:var(--accent); color:#fff; border:none;
   border-radius:11px; width:38px; height:38px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
-  font-size:18px; cursor:pointer; transition:all var(--dur) var(--ease);
+  font-size:17px; cursor:pointer; transition:all var(--dur) var(--ease);
   box-shadow:0 4px 14px var(--acc-glow);
 }
 .map-loc-btn:hover { background:var(--acc-l); transform:scale(1.06); }
@@ -424,10 +398,12 @@ nav.nav-hidden {
 
 /* Search dropdown */
 #srch-drop {
-  position:absolute; top:calc(100% + 6px); left:12px; right:12px;
+  position:absolute;
+  top:calc(100% + 4px);
+  left:12px; right:12px;
   background:rgba(11,17,35,.97); backdrop-filter:blur(24px);
   border:1px solid var(--border2); border-radius:14px;
-  overflow:hidden; z-index:999; pointer-events:all;
+  overflow:hidden; z-index:999;
   box-shadow:0 12px 40px rgba(0,0,0,.55);
   display:none;
 }
@@ -443,34 +419,64 @@ nav.nav-hidden {
 .sd-ico  { font-size:16px; margin-top:1px; flex-shrink:0; }
 .sd-name { font-weight:600; color:var(--t1); }
 .sd-addr { font-size:11.5px; color:var(--t2); margin-top:2px; line-height:1.4; }
-.sd-loading { padding:16px; text-align:center; color:var(--t2); font-size:13px; }
+.sd-info { padding:14px 16px; color:var(--t2); font-size:13px; text-align:center; }
 
 /* Spacer */
 .map-ui-mid { flex:1; }
 
-/* Route info bar */
-#route-bar {
-  pointer-events:all;
-  margin:0 12px 8px;
-  background:var(--glass); backdrop-filter:blur(22px);
-  border:1px solid var(--border2); border-radius:14px;
-  padding:12px 16px;
-  display:none;
-  align-items:center; gap:14px;
-  box-shadow:0 4px 20px rgba(0,0,0,.4);
-  animation:fadeUp .3s var(--ease);
+/* Navigation Mode Overrides */
+body.nav-mode header,
+body.nav-mode nav,
+body.nav-mode .map-srch-row,
+body.nav-mode #route-sheet,
+body.nav-mode .sens-panel,
+body.nav-mode .sim-btn,
+body.nav-mode .crash-badge,
+body.nav-mode .leaflet-control-zoom {
+  display: none !important;
 }
-#route-bar.show { display:flex; }
-.rb-info { flex:1; }
-.rb-dist { font-family:'Outfit',sans-serif; font-size:18px; font-weight:800; color:var(--accent); }
-.rb-dur  { font-size:12px; color:var(--t2); margin-top:2px; }
-.rb-clear {
-  background:rgba(255,71,87,.12); color:var(--red); border:1px solid rgba(255,71,87,.2);
-  border-radius:10px; padding:8px 14px; font-size:12px; font-weight:600;
-  cursor:pointer; font-family:'Inter',sans-serif; flex-shrink:0;
-  transition:all var(--dur);
+
+body.nav-mode .screen { padding-bottom: 0 !important; top: 0 !important; }
+
+/* Route Bottom Sheet (Google Maps Style) */
+#route-sheet {
+  pointer-events:all; margin:0 12px 12px;
+  background:var(--glass); backdrop-filter:blur(24px);
+  border:1px solid var(--border2); border-radius:20px;
+  padding:18px 20px; display:none; flex-direction:column; gap:16px;
+  box-shadow:0 10px 40px rgba(0,0,0,.5);
+  animation:fadeUp .4s var(--ease); z-index:100;
 }
-.rb-clear:hover { background:rgba(255,71,87,.22); }
+#route-sheet.show { display:flex; }
+.rs-top { display:flex; justify-content:space-between; align-items:flex-start; }
+.rs-time { font-family:'Outfit',sans-serif; font-size:28px; font-weight:800; color:var(--green); line-height:1.1; }
+.rs-dist { font-size:14px; color:var(--t2); font-weight:500; margin-top:4px; }
+.rs-fastest { font-size:13px; color:var(--t3); }
+.rs-close { background:rgba(255,255,255,.06); border:none; border-radius:50%; width:34px; height:34px; color:var(--t1); cursor:pointer; transition:all var(--dur); display:flex; align-items:center; justify-content:center; }
+.rs-close:hover { background:rgba(255,71,87,.2); color:var(--red); }
+.btn-start { width:100%; padding:14px; font-size:16px; font-weight:700; border-radius:14px; box-shadow:0 6px 20px var(--acc-glow); }
+
+/* Navigation Active Top Bar */
+#nav-active-ui {
+  position:absolute; top:12px; left:12px; right:12px;
+  background:rgba(11,17,35,.95); backdrop-filter:blur(24px);
+  border:1px solid var(--border2); border-radius:18px;
+  padding:16px 20px; pointer-events:all; z-index:200;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+  display:none; align-items:center; justify-content:space-between;
+  animation:fadeDown .4s var(--ease);
+}
+@keyframes fadeDown { from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:translateY(0);} }
+body.nav-mode #nav-active-ui { display:flex; }
+
+.nau-time { font-family:'Outfit',sans-serif; font-size:24px; font-weight:800; color:var(--green); line-height:1.1; }
+.nau-dist { font-size:13px; color:var(--t2); font-weight:500; margin-top:4px; }
+.nau-close {
+  background:rgba(255,71,87,.15); color:var(--red); border:1px solid rgba(255,71,87,.25);
+  border-radius:12px; padding:10px 18px; font-weight:700; font-size:14px; cursor:pointer;
+  transition:all var(--dur); font-family:'Inter',sans-serif;
+}
+.nau-close:hover { background:rgba(255,71,87,.25); }
 
 /* Sensor panel */
 .sens-panel {
@@ -490,7 +496,7 @@ nav.nav-hidden {
 .sp-bar  { height:4px; background:rgba(255,255,255,.07); border-radius:99px; overflow:hidden; }
 .sp-fill { height:100%; width:0; border-radius:99px; background:var(--teal); transition:width .18s, background .18s; }
 
-/* Sim crash btn */
+/* Simulate crash button */
 .sim-btn {
   position:absolute; bottom:calc(var(--nav-h) + 74px); right:12px;
   pointer-events:all;
@@ -502,10 +508,10 @@ nav.nav-hidden {
 }
 .sim-btn:hover { background:rgba(255,71,87,.28); }
 
-/* Crash badge */
+/* Crash detection badge */
 .crash-badge {
-  position:absolute;
-  bottom:calc(var(--nav-h) + 12px); left:50%; transform:translateX(-50%);
+  position:absolute; bottom:calc(var(--nav-h) + 12px);
+  left:50%; transform:translateX(-50%);
   pointer-events:all;
   background:var(--glass); backdrop-filter:blur(22px);
   border:1px solid rgba(0,212,170,.28); border-radius:99px;
@@ -515,9 +521,7 @@ nav.nav-hidden {
 .cb-dot { width:9px; height:9px; border-radius:50%; background:var(--teal); flex-shrink:0; animation:blink 2s infinite; }
 .cb-txt { font-size:13px; font-weight:600; color:var(--teal); }
 
-/* ===================================================
-   SOS OVERLAY
-=================================================== */
+/* ===================== SOS OVERLAY ===================== */
 #sos-ov {
   position:fixed; inset:0; z-index:9000;
   background:rgba(7,11,24,.96); backdrop-filter:blur(12px);
@@ -547,15 +551,12 @@ nav.nav-hidden {
   background:linear-gradient(135deg,var(--green),#00b050); color:#050e18;
   border:none; border-radius:14px; padding:15px 52px;
   font-size:16px; font-weight:800; cursor:pointer; font-family:'Outfit',sans-serif;
-  box-shadow:0 8px 28px rgba(0,230,118,.3);
-  transition:all var(--dur); margin-bottom:14px;
+  box-shadow:0 8px 28px rgba(0,230,118,.3); transition:all var(--dur); margin-bottom:14px;
 }
 .sos-ok:hover { transform:scale(1.04); }
 .sos-sending { font-size:12.5px; color:var(--t3); }
 
-/* ===================================================
-   PAY MODAL
-=================================================== */
+/* ===================== PAY MODAL ===================== */
 #pay-ov {
   position:fixed; inset:0; z-index:8000;
   background:rgba(7,11,24,.82); backdrop-filter:blur(8px);
@@ -572,11 +573,7 @@ nav.nav-hidden {
 #pay-ov.on .pay-sheet { transform:translateY(0); }
 .ps-handle { width:38px; height:4px; border-radius:99px; background:rgba(255,255,255,.12); margin:0 auto 22px; }
 .ps-ttl  { font-family:'Outfit',sans-serif; font-size:19px; font-weight:800; margin-bottom:18px; }
-.ps-amt  {
-  text-align:center; padding:22px 16px;
-  background:rgba(255,71,87,.05); border:1px solid rgba(255,71,87,.12);
-  border-radius:14px; margin-bottom:18px;
-}
+.ps-amt  { text-align:center; padding:22px 16px; background:rgba(255,71,87,.05); border:1px solid rgba(255,71,87,.12); border-radius:14px; margin-bottom:18px; }
 .ps-amtv { font-family:'Outfit',sans-serif; font-size:42px; font-weight:900; color:var(--red); }
 .ps-amtl { font-size:12.5px; color:var(--t2); margin-top:4px; }
 .pay-methods { display:flex; flex-direction:column; gap:9px; margin-bottom:22px; }
@@ -597,8 +594,7 @@ nav.nav-hidden {
   color:#fff; border:none; border-radius:14px;
   font-size:15px; font-weight:800; cursor:pointer;
   font-family:'Outfit',sans-serif;
-  box-shadow:0 6px 24px var(--acc-glow);
-  transition:all var(--dur);
+  box-shadow:0 6px 24px var(--acc-glow); transition:all var(--dur);
 }
 .pay-go:hover { transform:scale(1.02); }
 .pay-can {
@@ -608,9 +604,7 @@ nav.nav-hidden {
 }
 .pay-can:hover { color:var(--t1); }
 
-/* ===================================================
-   TOAST
-=================================================== */
+/* ===================== TOAST ===================== */
 #toast {
   position:fixed; bottom:calc(var(--nav-h) + 18px); left:50%;
   transform:translateX(-50%) translateY(16px);
@@ -622,14 +616,17 @@ nav.nav-hidden {
 }
 #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-/* ===================================================
-   USER LOCATION MARKER
-=================================================== */
+/* ===================== MARKERS ===================== */
 .user-dot {
   width:16px; height:16px;
-  background:var(--accent);
-  border:3px solid #fff; border-radius:50%;
+  background:var(--accent); border:3px solid #fff; border-radius:50%;
   box-shadow:0 0 0 8px rgba(255,107,53,.22), 0 2px 12px rgba(0,0,0,.5);
+}
+.nav-arrow {
+  width:28px; height:28px;
+  display:flex; align-items:center; justify-content:center;
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
 }
 .dest-pin {
   background:var(--red); width:14px; height:14px;
