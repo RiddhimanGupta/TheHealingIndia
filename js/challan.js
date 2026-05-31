@@ -1,23 +1,29 @@
 // js/challan.js
 
-import { toast } from './ui.js';
 import { PROFILES, SVG_FN, TYPE_LABEL } from './data/profiles.js';
 
+// Global variables for the Challan state
 let currentPayId = null;
+const paidChallans = new Set(); // Remembers payments during the session
 
-// Internal helper function
+// Your original Hash Function
 function hashStr(s) {
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = Math.imul(h, 33) ^ s.charCodeAt(i);
   return Math.abs(h);
 }
 
+// Ensure window.toast exists (it's defined in your UI logic)
+function triggerToast(msg) {
+  if (window.toast) window.toast(msg);
+}
+
 export function lookupChallan(val) {
   let q = val || document.getElementById('reg-inp').value;
   q = q.toUpperCase().trim();
   
-  if (!q) { toast("Please enter a vehicle number."); return; }
-  if (q.length < 4) { toast("Invalid registration number."); return; }
+  if (!q) { triggerToast("Please enter a vehicle number."); return; }
+  if (q.length < 4) { triggerToast("Invalid registration number."); return; }
 
   const out = document.getElementById('ch-result');
   out.innerHTML = `<div style="text-align:center; padding:40px; color:var(--t2)">
@@ -25,13 +31,24 @@ export function lookupChallan(val) {
   </div>`;
 
   setTimeout(() => {
-    // Determine a consistent profile based on the string hash
+    // Original profile lookup logic
     const idx = hashStr(q) % PROFILES.length;
     const p = PROFILES[idx];
+    
     const profile = {
       ...p,
       registration: q,
-      challans: p.challans.map(ch => ({ ...ch, _id: `${q}-${Math.random().toString(36).slice(2,7)}` }))
+      challans: p.challans.map((ch, i) => {
+        // Deterministic ID so it remembers paid state correctly
+        const challanId = `${q}-${i}-${hashStr(ch.reason)}`;
+        const isPaid = paidChallans.has(challanId) || ch.status === 'paid';
+        
+        return { 
+          ...ch, 
+          _id: challanId,
+          status: isPaid ? 'paid' : 'pending' 
+        };
+      })
     };
     renderResult(profile, q, out);
   }, 600 + Math.random() * 600);
@@ -43,6 +60,7 @@ export function quickLook(reg) {
   setTimeout(() => document.getElementById('ch-result').scrollIntoView({ behavior:'smooth', block:'start' }), 150);
 }
 
+// Your exact original HTML rendering algorithm
 function renderResult(d, plate, out) {
   const pending  = d.challans.filter(c => c.status === 'pending');
   const totalAmt = pending.reduce((s, c) => s + c.amount, 0);
@@ -127,20 +145,20 @@ export function selPM(el) {
 
 export function confirmPay() {
   closePay();
-  toast('✅ Payment successful! Challan cleared.');
-  
+  triggerToast('✅ Payment successful! Challan cleared.');
   if (!currentPayId) return;
+  
+  // Record the payment
+  paidChallans.add(currentPayId);
+  
   const card = document.getElementById('card-' + currentPayId);
   if (!card) return;
   
-  // Update the UI state of the specific card
   card.classList.replace('ch-pend', 'ch-paid');
   card.querySelector('.sbadge').className = 'sbadge s-paid';
   card.querySelector('.sbadge').textContent = '✅ Paid';
-  
   const amt = card.querySelector('.cch-amt');
   if (amt) amt.classList.add('cch-amt-paid');
-  
   const acts = card.querySelector('.cch-actions');
   if (acts) acts.innerHTML = `
     <button class="btn btn-green" disabled>✅ Paid</button>
@@ -148,5 +166,5 @@ export function confirmPay() {
 }
 
 export function disputeIt(id) { 
-  toast('📝 Dispute filed for ' + id.toUpperCase() + '. You will hear back in 7 working days.'); 
+  triggerToast('📝 Dispute filed for ' + id.toUpperCase() + '. You will hear back in 7 working days.'); 
 }
