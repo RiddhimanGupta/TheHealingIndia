@@ -28,7 +28,7 @@ const PROFILES = [];
 const ALL_CHALLANS = [C.signal, C.mobile, C.helmet, C.speed, C.wrongside, C.noins, C.triple, C.parking, C.seatbelt, C.nopuc, C.drunk, C.speeding2, C.signalPaid, C.helmetPaid, C.speedPaid, C.parkingPaid, C.mobilePaid];
 
 for (let i = 0; i < 50; i++) {
-  const numChallans = i < 15 ? 0 : (i % 3) + 1; 
+  const numChallans = i < 15 ? 0 : (i % 3) + 1; // 15 with 0 challans, others 1-3
   const challans = [];
   for(let j = 0; j < numChallans; j++) {
     challans.push(ALL_CHALLANS[(i * 7 + j * 3) % ALL_CHALLANS.length]());
@@ -71,5 +71,5 @@ function svgBike(c) {
 const SVG_FN = { bike: svgBike };
 const TYPE_LABEL = { bike: "🏍️ Motorcycle" };
 
-// Export the data for use in other files
+// Export exactly what the Challan algorithm needs
 export { PROFILES, SVG_FN, TYPE_LABEL };
