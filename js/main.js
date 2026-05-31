@@ -3,7 +3,7 @@
 import { initUI, go, toast } from './ui.js';
 import { initSensors, triggerSOS, cancelSOS, simCrash } from './sensors.js';
 import { lookupChallan, quickLook, openPay, closePay, selPM, confirmPay, disputeIt } from './challan.js';
-import { initMap, centerOnUser, startTrip, endTrip, clearRoute } from './map.js';
+import { initMap, centerOnUser, startTrip, endTrip, clearRoute, fixMapSize, onMapSearch, selectPlace } from './map.js';
 
 // 1. RUN INITIALIZATION DIRECTLY (No DOMContentLoaded wrapper needed for modules!)
 initUI();
@@ -42,3 +42,5 @@ window.go = (tab) => {
     setTimeout(fixMapSize, 400); // Wait for the CSS animation to finish before fixing size
   }
 };
+window.onMapSearch = onMapSearch;
+window.selectPlace = selectPlace;
