@@ -133,7 +133,24 @@
 body.nav-mode header, body.nav-mode nav, body.nav-mode .map-srch-row, body.nav-mode #route-sheet, body.nav-mode .sens-panel, body.nav-mode .sim-btn, body.nav-mode .crash-badge, body.nav-mode .leaflet-control-zoom { display: none !important; }
 body.nav-mode .screen { padding-bottom: 0 !important; top: 0 !important; }
 
-#route-sheet { pointer-events: all; margin: 0 12px 12px; background: var(--glass); backdrop-filter: blur(24px); border: 1px solid var(--border2); border-radius: 20px; padding: 18px 20px; display: none; flex-direction: column; gap: 16px; box-shadow: 0 10px 40px rgba(0,0,0,.5); animation: fadeUp .4s var(--ease); z-index: 100; }
+/* js/screens.css */
+
+#route-sheet { 
+  pointer-events: all; 
+  /* FIX: Pushes the route sheet up so the nav bar doesn't cover it */
+  margin: 0 12px calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px); 
+  background: var(--glass); 
+  backdrop-filter: blur(24px); 
+  border: 1px solid var(--border2); 
+  border-radius: 20px; 
+  padding: 18px 20px; 
+  display: none; 
+  flex-direction: column; 
+  gap: 16px; 
+  box-shadow: 0 10px 40px rgba(0,0,0,.5); 
+  animation: fadeUp .4s var(--ease); 
+  z-index: 100; 
+}}
 #route-sheet.show { display: flex; }
 .rs-top { display: flex; justify-content: space-between; align-items: flex-start; }
 .rs-time { font-family: 'Outfit',sans-serif; font-size: 28px; font-weight: 800; color: var(--green); line-height: 1.1; }
