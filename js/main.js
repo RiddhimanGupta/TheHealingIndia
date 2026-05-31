@@ -35,3 +35,10 @@ window.centerOnUser = centerOnUser;
 window.startTrip = startTrip;
 window.endTrip = endTrip;
 window.clearRoute = clearRoute;
+window.go = (tab) => {
+  go(tab);
+  if (tab === 'maps') {
+    initMap();
+    setTimeout(fixMapSize, 400); // Wait for the CSS animation to finish before fixing size
+  }
+};
