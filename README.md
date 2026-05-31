@@ -36,19 +36,13 @@ THI addresses three hackathon challenge tracks within a single cohesive platform
 
 RoadSoS monitors three data streams simultaneously using the phone's built-in hardware without requiring external sensors, OBD devices, or dashcams.
 
-* 
+
 **Impact Detection:** Uses the Accelerometer (`DeviceMotionEvent`) to measure G-Force spikes, detecting if sudden acceleration exceeds a crash threshold.
 
-
-* 
 **Orientation Detection:** Uses the Gyroscope (`DeviceOrientation`) to measure rotation angle changes, distinguishing a real crash from a phone simply falling off a mount.
 
-
-* 
 **Speed Confirmation:** Uses the GPS (`Geolocation API`) to detect a velocity drop to zero, confirming the vehicle was in motion and stopped upon impact.
 
-
-* 
 **Human Check & Dispatch:** If a crash is detected, a 10-second countdown UI appears. If the rider does not press "I'm Safe", live coordinates are automatically dispatched to emergency contacts and the nearest hospital via the Overpass API.
 
 
@@ -59,15 +53,13 @@ RoadSoS monitors three data streams simultaneously using the phone's built-in ha
 
 Traffic violations can lead to accumulated debt or vehicle impoundment. DriveLegal closes this gap by providing riders with clear visibility into their legal standing.
 
-* 
+
 **Registration Lookup:** Simulates queries against the Vahan database to check vehicle status.
 
 
-* 
 **Active Challan Tracking:** Pulls and displays all pending violations and fine amounts.
 
 
-* 
 **Integrated Payments:** Features demo deep-links to UPI apps (Google Pay, PhonePe, Paytm) to allow immediate fine settlement.
 
 
@@ -78,11 +70,11 @@ Traffic violations can lead to accumulated debt or vehicle impoundment. DriveLeg
 
 RoadWatch builds a living, crowd-sourced map of road hazards that government databases often miss.
 
-* 
+
 **Live Hazard Mapping:** Warns riders of dark colony lanes and hidden hazards.
 
 
-* 
+
 **Pothole Reporting (Future Feature):** Potholes reported by riders will reflect directly on a live navigation overlay for all community users.
 
 
@@ -91,15 +83,15 @@ RoadWatch builds a living, crowd-sourced map of road hazards that government dat
 
 The dashboard provides a gamified safety score that riders can actively improve.
 
-* 
+
 **Safety Score (0–100):** Calculates safe mileage traversed relative to community-flagged hazards and valid potholes.
 
 
-* 
+
 **Trip Log & Challan Zones:** Tracks GPS mileage per session and counts geofencing hits to warn riders of heavy enforcement zones.
 
 
-* 
+
 **Crash Alert History:** Maintains a RoadSoS event log for insurance or employer incident reports.
 
 
@@ -165,23 +157,22 @@ The live platform is a functional preview designed to demonstrate the core exper
 
 ## 🔮 Future Roadmap
 
-* 
+
 **Gig Platform API Integration:** Surfacing safety scores on Zomato/Swiggy profiles to provide financial incentives for safe riding.
 
 
-* 
+  
 **Microinsurance Linkage:** Creating dynamic, per-trip coverage priced by the THI safety score.
 
 
-* 
+  
 **MoRTH Data Pipeline:** Feeding RoadWatch hazard reports into the government's road maintenance databases.
 
 
-* 
+  
 **Multilingual Legal Assistant:** Expanding DriveLegal with an NLP layer to answer traffic law queries in 12 regional languages.
 
-
-* 
+ 
 **Wearable SOS Extension:** Forwarding crash alerts to smartwatches for hands-free confirmation.
 
 
