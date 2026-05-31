@@ -5,12 +5,11 @@
 
 /* ----------------------------------------------------------
    HASH FUNCTION
-   Maps any string deterministically to a profile index
 ---------------------------------------------------------- */
 function hashStr(s) {
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = Math.imul(h, 33) ^ s.charCodeAt(i);
-  return Math.abs(h) % window.PROFILES.length;
+  return Math.abs(h);
 }
 
 /* ----------------------------------------------------------
@@ -23,23 +22,20 @@ let destMarker    = null;
 let routeLine     = null;
 let mapInited     = false;
 let gpsSpeed      = 0;
-let gyroRate      = 0;
-let prevMag       = 9.81;
-let prevTime      = 0;
-let accBuf        = [];
-let jerkBuf       = [];
-let recentHighG   = [];
 let crashCooldown = false;
 let sosTimer      = null;
 let sosSecs       = 10;
 let srchTimer     = null;
 let isTravelling  = false;
 
+// Sliding sensor buffer for math-accurate collision calculations
+let sensorHistory = [];
+const HISTORY_WINDOW_MS = 1500; 
+
 /* ----------------------------------------------------------
    SPLASH → APP
 ---------------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Force the splash screen to disappear after 1 second max
   setTimeout(() => {
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
@@ -47,23 +43,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (splash) splash.classList.add('out');
     if (app) app.classList.add('show');
     
-    // 2. Initialize the crash detection sensors
-    try { initSensors(); } catch (err) {}
+    initSensors();
   }, 1000); 
+  
+  initNavbarScroll();
 });
 
 /* ----------------------------------------------------------
    NAVIGATION
 ---------------------------------------------------------- */
 function go(tab) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
-  document.getElementById('screen-' + tab).classList.add('on');
-  document.getElementById('ni-' + tab).classList.add('on');
+  document.querySelectorAll('.screen, .ni').forEach(el => el.classList.remove('on'));
   
-  // Ensure navbar reappears instantly when changing tabs
+  const screenEl = document.getElementById('screen-' + tab);
+  const navItemEl = document.getElementById('ni-' + tab);
+  if (screenEl) screenEl.classList.add('on');
+  if (navItemEl) navItemEl.classList.add('on');
+  
   const nav = document.querySelector('nav');
-  if(nav) nav.classList.remove('nav-hidden'); 
+  if (nav) nav.classList.remove('nav-hidden'); 
 
   if (tab === 'maps' && !mapInited) initMap();
 }
@@ -72,16 +70,11 @@ function go(tab) {
    CHALLAN LOGIC
 ---------------------------------------------------------- */
 function lookupChallan(val) {
-  let q = document.getElementById('reg-inp').value;
-  if (typeof val === 'string') q = val;
+  let q = val || document.getElementById('reg-inp').value;
   q = q.toUpperCase().trim();
   
   if (!q) { toast("Please enter a vehicle number."); return; }
   if (q.length < 4) { toast("Invalid registration number."); return; }
-
-  // Hash deterministically
-  const idx = hashStr(q) % window.PROFILES.length;
-  const p = window.PROFILES[idx];
 
   const out = document.getElementById('ch-result');
   out.innerHTML = `<div style="text-align:center; padding:40px; color:var(--t2)">
@@ -89,14 +82,15 @@ function lookupChallan(val) {
   </div>`;
 
   setTimeout(() => {
-    // Deep-copy for unique session state
+    const idx = hashStr(q) % window.PROFILES.length;
+    const p = window.PROFILES[idx];
     const profile = {
       ...p,
       registration: q,
       challans: p.challans.map(ch => ({ ...ch, _id: `${q}-${Math.random().toString(36).slice(2,7)}` }))
     };
     renderResult(profile, q, out);
-  }, 800 + Math.random()*800);
+  }, 600 + Math.random() * 600);
 }
 
 function quickLook(reg) {
@@ -126,9 +120,7 @@ function renderResult(d, plate, out) {
           </div>
           <span class="sbadge s-${c.status}">${c.status === 'pending' ? '⚠️ Pending' : '✅ Paid'}</span>
         </div>
-        <div class="cch-meta">
-          <div class="cch-mc">📍 ${c.zone}</div>
-        </div>
+        <div class="cch-meta"><div class="cch-mc">📍 ${c.zone}</div></div>
         <div class="cch-amt-row">
           <div>
             <div style="font-size:11px;color:var(--t2);margin-bottom:2px">Fine Amount</div>
@@ -205,19 +197,14 @@ function confirmPay() {
 function disputeIt(id) { toast('📝 Dispute filed for ' + id.toUpperCase() + '. You will hear back in 7 working days.'); }
 
 /* ----------------------------------------------------------
-   OPENSTREETMAP + LEAFLET MAP
+   MAP ENGINE (LEAFLET)
 ---------------------------------------------------------- */
 function initMap() {
   mapInited = true;
-
-  // Restrict map panning to India to prevent endless scrolling/looping
-  const indiaBounds = L.latLngBounds(
-    [6.4626, 68.1097], // South-West
-    [35.5133, 97.3953] // North-East
-  );
+  const indiaBounds = L.latLngBounds([6.4626, 68.1097], [35.5133, 97.3953]);
 
   leafletMap = L.map('leaflet-map', {
-    center: [28.6692, 77.4538], // Centered directly on Ghaziabad / Delhi NCR
+    center: [28.6692, 77.4538], // Ghaziabad / Delhi NCR
     zoom: 14,
     minZoom: 5,
     maxBounds: indiaBounds,
@@ -228,9 +215,7 @@ function initMap() {
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains:'abcd', maxZoom:19,
-    noWrap: true, // Stops map loop issue
-    detectRetina: true // Fixes nasty blurry resolution
+    subdomains:'abcd', maxZoom:19, noWrap: true, detectRetina: true
   }).addTo(leafletMap);
 
   leafletMap.zoomControl.setPosition('bottomright');
@@ -261,22 +246,33 @@ function locateUser() {
       userMarker.setIcon(L.divIcon({ className:'', html:arrowHtml, iconSize:[28,28], iconAnchor:[14,14] }));
     }
     if (isTravelling) leafletMap.setView(ll, 17, { animate: true });
+    updateSensorUI(null, null, null); // Sync UI elements
   }, null, { enableHighAccuracy:true, timeout:15000, maximumAge:2000 });
 }
 
 function startTrip() {
   isTravelling = true;
   document.body.classList.add('nav-mode');
+  document.getElementById('route-sheet').classList.remove('show');
+  document.getElementById('nav-active-ui').classList.add('show');
   if (userMarker) leafletMap.setView(userMarker.getLatLng(), 18, { animate: true });
   toast("🗺️ Navigation started! Follow the route.");
-  initSensors();
 }
 
 function endTrip() {
   isTravelling = false;
   document.body.classList.remove('nav-mode');
+  document.getElementById('nav-active-ui').classList.remove('show');
+  clearRoute();
   if (userMarker) leafletMap.setView(userMarker.getLatLng(), 15, { animate: true });
   toast("🛑 Trip ended.");
+}
+
+function clearRoute() {
+  if (routeLine) { leafletMap.removeLayer(routeLine); routeLine = null; }
+  if (destMarker) { leafletMap.removeLayer(destMarker); destMarker = null; }
+  document.getElementById('route-sheet').classList.remove('show');
+  document.getElementById('map-inp').value = '';
 }
 
 function centerOnUser() {
@@ -286,7 +282,7 @@ function centerOnUser() {
 }
 
 /* ----------------------------------------------------------
-   NOMINATIM PLACE SEARCH
+   NOMINATIM SEARCH
 ---------------------------------------------------------- */
 function onMapSearch(val) {
   clearTimeout(srchTimer);
@@ -303,16 +299,12 @@ function onMapSearch(val) {
       }
       const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&limit=6&countrycodes=in&addressdetails=1${viewboxParam}`;
       const res  = await fetch(url, { headers:{ 'Accept':'application/json' } });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
       if (!data.length) { drop.innerHTML = '<div class="sd-info" style="color:var(--t3)">No results found.</div>'; return; }
       drop.innerHTML = data.map(r => {
         const name = r.name || r.display_name.split(',')[0].trim();
-        const addr = r.display_name;
-        const lat  = parseFloat(r.lat);
-        const lng  = parseFloat(r.lon);
-        return `<div class="sd-item" onclick="selectPlace(${lat},${lng},'${esc(name)}','${esc(addr)}')">
-          <span class="sd-ico">📌</span><div><div class="sd-name">${name}</div><div class="sd-addr">${addr}</div></div>
+        return `<div class="sd-item" onclick="selectPlace(${parseFloat(r.lat)},${parseFloat(r.lon)},'${esc(name)}')">
+          <span class="sd-ico">📌</span><div><div class="sd-name">${name}</div><div class="sd-addr">${r.display_name}</div></div>
         </div>`;
       }).join('');
     } catch(err) {
@@ -323,9 +315,8 @@ function onMapSearch(val) {
 
 function esc(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
-function selectPlace(lat, lng, name, addr) {
-  const drop = document.getElementById('srch-drop');
-  drop.classList.remove('show');
+function selectPlace(lat, lng, name) {
+  document.getElementById('srch-drop').classList.remove('show');
   document.getElementById('map-inp').value = name;
   const ll = [lat, lng];
   if (destMarker) leafletMap.removeLayer(destMarker);
@@ -339,51 +330,131 @@ function fetchRoute(origin, dest) {
   fetch(url)
     .then(r => r.json())
     .then(data => {
+      if(!data.routes || !data.routes.length) return;
       const route  = data.routes[0];
       const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
       if (routeLine) leafletMap.removeLayer(routeLine);
       routeLine = L.polyline(coords, { color:'#ff6b35', weight:5 }).addTo(leafletMap);
       leafletMap.fitBounds(routeLine.getBounds(), { padding:[50,50] });
+      
+      document.getElementById('rs-dur').textContent = `${Math.round(route.duration/60)} min`;
+      document.getElementById('rs-dist').textContent = `${(route.distance/1000).toFixed(1)} km`;
+      document.getElementById('nau-dur').textContent = `${Math.round(route.duration/60)} min`;
+      document.getElementById('nau-dist').textContent = `${(route.distance/1000).toFixed(1)} km remaining`;
       document.getElementById('route-sheet').classList.add('show');
     })
     .catch(() => toast('⚠️ Routing service unavailable.'));
 }
 
 /* ----------------------------------------------------------
-   CRASH DETECTION & SENSOR FUSION ALGORITHM
+   PRODUCTION CRASH DETECTION ENGINE (ACTUAL HARDWARE SENSORS)
 ---------------------------------------------------------- */
 function initSensors() {
-  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-    DeviceMotionEvent.requestPermission().then(s => {
-      if (s === 'granted') window.addEventListener('devicemotion', handleMotion);
-    });
+  // Option A: Modern W3C Generic Sensor API Tier
+  if ('LinearAccelerationSensor' in window && 'Gyroscope' in window) {
+    Promise.all([
+      navigator.permissions.query({ name: 'accelerometer' }),
+      navigator.permissions.query({ name: 'gyroscope' })
+    ]).then(results => {
+      if (results.every(result => result.state === 'granted' || result.state === 'prompt')) {
+        const accSensor = new LinearAccelerationSensor({ frequency: 20 });
+        const gyroSensor = new Gyroscope({ frequency: 20 });
+        
+        accSensor.addEventListener('reading', () => {
+          processSensorTicks(accSensor.x, accSensor.y, accSensor.z, null, null, null);
+        });
+        gyroSensor.addEventListener('reading', () => {
+          processSensorTicks(null, null, null, gyroSensor.x, gyroSensor.y, gyroSensor.z);
+        });
+        
+        accSensor.start();
+        gyroSensor.start();
+        return;
+      }
+      fallbackDeviceMotion();
+    }).catch(() => fallbackDeviceMotion());
   } else {
-    window.addEventListener('devicemotion', handleMotion);
+    fallbackDeviceMotion();
   }
 }
 
-let sensorHistory = [];
-const HISTORY_LEN = 30;
+function fallbackDeviceMotion() {
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission().then(state => {
+      if (state === 'granted') window.addEventListener('devicemotion', handleLegacyMotion);
+    }).catch(err => console.log("Sensor permission denied", err));
+  } else {
+    window.addEventListener('devicemotion', handleLegacyMotion);
+  }
+}
 
-function handleMotion(e) {
-  const acc = e.acceleration || e.accelerationIncludingGravity || {x:0, y:0, z:0};
-  const rot = e.rotationRate || {alpha:0, beta:0, gamma:0};
+// Global cached vectors to synchronize separate axis reads
+let _lastAcc = { x: 0, y: 0, z: 0 };
+let _lastRot = { x: 0, y: 0, z: 0 };
+
+function handleLegacyMotion(e) {
+  const acc = e.acceleration || e.accelerationIncludingGravity || { x: 0, y: 0, z: 0 };
+  const rot = e.rotationRate || { alpha: 0, beta: 0, gamma: 0 };
+  
+  // Convert standard gravity offsets if reading includes base gravity
+  let x = acc.x || 0, y = acc.y || 0, z = acc.z || 0;
+  if (e.accelerationIncludingGravity) {
+    z = z - 9.81; 
+  }
+  
+  // Deg/sec convert to rad/sec if using standard rotation rate fallbacks
+  const degToRad = Math.PI / 180;
+  processSensorTicks(x, y, z, (rot.alpha || 0) * degToRad, (rot.beta || 0) * degToRad, (rot.gamma || 0) * degToRad);
+}
+
+function processSensorTicks(ax, ay, az, gx, gy, gz) {
   if (crashCooldown) return;
-  const ax = acc.x || 0; const ay = acc.y || 0; const az = acc.z || 0;
-  const gx = rot.alpha || 0; const gy = rot.beta || 0; const gz = rot.gamma || 0;
-  const aMag = Math.sqrt(ax*ax + ay*ay + az*az);
-  const gForce = aMag / 9.81;
-  const rotMag = Math.sqrt(gx*gx + gy*gy + gz*gz);
+
   const now = Date.now();
-  sensorHistory.push({ time: now, aMag, rotMag, speed: gpsSpeed || 0 });
-  if (sensorHistory.length > HISTORY_LEN) sensorHistory.shift();
+  if (ax !== null) _lastAcc = { x: ax, y: ay, z: az };
+  if (gx !== null) _lastRot = { x: gx, y: gy, z: gz };
+
+  const aMag = Math.sqrt(_lastAcc.x**2 + _lastAcc.y**2 + _lastAcc.z**2);
+  const rotMag = Math.sqrt(_lastRot.x**2 + _lastRot.y**2 + _lastRot.z**2); // Rad/s
+  const gForce = aMag / 9.81;
+
+  sensorHistory.push({ time: now, aMag, gForce, rotMag });
+  
+  // Retain historical logging constraints
+  sensorHistory = sensorHistory.filter(item => now - item.time <= HISTORY_WINDOW_MS);
   if (sensorHistory.length < 5) return;
+
   const prev = sensorHistory[sensorHistory.length - 3];
   const dt = (now - prev.time) / 1000;
   const jerk = dt > 0 ? Math.abs(aMag - prev.aMag) / dt : 0;
-  const isHighImpact = gForce > 3.5;
-  const isSuddenJerk = jerk > 50;
-  if (isHighImpact && isSuddenJerk) triggerSOS();
+
+  updateSensorUI(gForce, jerk, rotMag);
+
+  // Crash Threshold: G-Force > 4.0G and Jerk rate displacement > 60m/s³
+  if (gForce > 4.0 && jerk > 60) {
+    triggerSOS();
+  }
+}
+
+function updateSensorUI(g, j, r) {
+  const elG = document.getElementById('sv-g');
+  const elJ = document.getElementById('sv-j');
+  const elR = document.getElementById('sv-r');
+  const elS = document.getElementById('sv-s');
+  const elF = document.getElementById('sv-sf');
+
+  if (elG && g !== null) elG.textContent = `${g.toFixed(2)} G`;
+  if (elJ && j !== null) elJ.textContent = `${Math.round(j)} m/s³`;
+  if (elR && r !== null) elR.textContent = `${Math.round(r * (180 / Math.PI))}°/s`;
+
+  // Calculate dynamic driving safety indicator score
+  let baseScore = 98;
+  if (g > 1.5) baseScore -= 15;
+  if (gpsSpeed > 75) baseScore -= 20;
+  const finalScore = Math.max(10, baseScore);
+
+  if (elS) elS.textContent = finalScore;
+  if (elF) elF.style.width = `${finalScore}%`;
 }
 
 /* ----------------------------------------------------------
@@ -393,75 +464,78 @@ function triggerSOS() {
   if (crashCooldown) return;
   crashCooldown = true;
   sosSecs = 10;
-  document.getElementById('sos-ov').classList.add('on');
-  document.getElementById('sos-num').textContent = sosSecs;
-  document.getElementById('sos-ct').textContent  = sosSecs;
+  
+  const ov = document.getElementById('sos-ov');
+  const num = document.getElementById('sos-num');
+  const ct = document.getElementById('sos-ct');
+  
+  if (ov) ov.classList.add('on');
+  if (num) num.textContent = sosSecs;
+  if (ct) ct.textContent = sosSecs;
+
+  clearInterval(sosTimer);
   sosTimer = setInterval(() => {
     sosSecs--;
-    document.getElementById('sos-num').textContent = sosSecs;
-    document.getElementById('sos-ct').textContent  = sosSecs;
-    if (sosSecs <= 0) { clearInterval(sosTimer); sendSOS(); }
+    if (num) num.textContent = sosSecs;
+    if (ct) ct.textContent = sosSecs;
+    
+    if (sosSecs <= 0) { 
+      clearInterval(sosTimer); 
+      sendSOS(); 
+    }
   }, 1000);
 }
 
 function cancelSOS() {
   clearInterval(sosTimer);
-  document.getElementById('sos-ov').classList.remove('on');
+  const ov = document.getElementById('sos-ov');
+  if (ov) ov.classList.remove('on');
   toast("✅ SOS cancelled. Glad you're safe!");
-  setTimeout(() => { crashCooldown = false; }, 30000);
+  setTimeout(() => { crashCooldown = false; }, 15000); // 15s cooldown reset safely
 }
 
 function sendSOS() {
-  document.getElementById('sos-ov').classList.remove('on');
+  const ov = document.getElementById('sos-ov');
+  if (ov) ov.classList.remove('on');
   toast('🆘 Emergency SOS sent to contacts & nearest hospital!');
-  setTimeout(() => { crashCooldown = false; }, 60000);
+  setTimeout(() => { crashCooldown = false; }, 45000);
 }
 
-// Desktop / demo crash simulation
 function simCrash() {
   toast('⚡ Simulating crash detection…');
   setTimeout(() => {
-    const el1 = document.getElementById('sv-g'); if(el1) el1.textContent = '26.4 m/s²';
-    const el2 = document.getElementById('sv-j'); if(el2) el2.textContent = '118 m/s³';
-    const el3 = document.getElementById('sv-r'); if(el3) el3.textContent = '255°/s';
-    const el4 = document.getElementById('sv-s'); if(el4) el4.textContent = '88';
-    if (!crashCooldown) triggerSOS();
-  }, 700);
+    processSensorTicks(42.5, 12.1, 8.4, 4.5, 2.1, 1.2); 
+  }, 500);
 }
 
 /* ----------------------------------------------------------
-   TOAST UTILITY
+   NAVBAR VISIBILITY AND UTILITIES
 ---------------------------------------------------------- */
 let _toastTimer;
 function toast(msg) {
   const el = document.getElementById('toast');
+  if (!el) return;
   clearTimeout(_toastTimer);
   el.textContent = msg;
   el.classList.add('show');
   _toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
 }
 
-/* =======================================================
-   SMART SCROLL NAVBAR LOGIC
-======================================================= */
-const navbar = document.querySelector('nav');
-let lastScrollY = 0;
+function initNavbarScroll() {
+  const navbar = document.querySelector('nav');
+  let lastScrollY = 0;
 
-// Attach scroll listeners to all scrollable screens
-document.querySelectorAll('.screen').forEach(screen => {
-  screen.addEventListener('scroll', (e) => {
-    const currentScrollY = e.target.scrollTop;
+  document.querySelectorAll('.screen').forEach(screen => {
+    screen.addEventListener('scroll', (e) => {
+      const currentScrollY = e.target.scrollTop;
+      if (Math.abs(currentScrollY - lastScrollY) < 12) return;
 
-    // Ignore tiny accidental scrolls (less than 10px) to prevent jitter
-    if (Math.abs(currentScrollY - lastScrollY) < 10) return;
-
-    // If scrolling down AND past the top 50px of the screen
-    if (currentScrollY > lastScrollY && currentScrollY > 50) {
-      if (navbar) navbar.classList.add('nav-hidden'); 
-    } else {
-      if (navbar) navbar.classList.remove('nav-hidden'); 
-    }
-
-    lastScrollY = currentScrollY;
-  }, { passive: true });
-});
+      if (currentScrollY > lastScrollY && currentScrollY > 60) {
+        if (navbar) navbar.classList.add('nav-hidden'); 
+      } else {
+        if (navbar) navbar.classList.remove('nav-hidden'); 
+      }
+      lastScrollY = currentScrollY;
+    }, { passive: true });
+  });
+}
