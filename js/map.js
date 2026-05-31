@@ -226,13 +226,21 @@ function fetchRoute(origin, dest) {
       leafletMap.fitBounds(routeLine.getBounds(), { padding:[50,50] });
       
       // Update UI panels with time and distance
+// Replace the old UI update block inside fetchRoute() with this:
+
+      // Update UI panels with time and distance using bulletproof class selectors
       const durMin = Math.round(route.duration/60);
       const distKm = (route.distance/1000).toFixed(1);
       
-      document.getElementById('rs-dur').textContent = `${durMin} min`;
-      document.getElementById('rs-dist').textContent = `${distKm} km`;
-      document.getElementById('nau-dur').textContent = `${durMin} min`;
-      document.getElementById('nau-dist').textContent = `${distKm} km remaining`;
+      const elRsTime = document.querySelector('.rs-time');
+      const elRsDist = document.querySelector('.rs-dist');
+      const elNauTime = document.querySelector('.nau-time');
+      const elNauDist = document.querySelector('.nau-dist');
+
+      if (elRsTime) elRsTime.textContent = `${durMin} min`;
+      if (elRsDist) elRsDist.textContent = `${distKm} km`;
+      if (elNauTime) elNauTime.textContent = `${durMin} min`;
+      if (elNauDist) elNauDist.textContent = `${distKm} km remaining`;
       
       const sheet = document.getElementById('route-sheet');
       if (sheet) sheet.classList.add('show');
