@@ -1,6 +1,6 @@
 // js/sensors.js
 import { toast } from './ui.js';
-import { gpsSpeed } from './map.js'; // Imports real speed from your map file
+import { gpsSpeed } from './map.js';
 
 let crashCooldown = false;
 let sosTimer = null;
@@ -8,68 +8,45 @@ let sosSecs = 10;
 let sensorHistory = [];
 const HISTORY_WINDOW_MS = 1500; 
 
-// Store the latest sensor readings
-let _lastAcc = { x: 0, y: 0, z: 0 };
-let _lastRot = { x: 0, y: 0, z: 0 };
-
 export function initSensors() {
-  // 1. Try Modern W3C Sensor API (Android / Chrome)
-  if ('LinearAccelerationSensor' in window && 'Gyroscope' in window) {
-    try {
-      const accSensor = new LinearAccelerationSensor({ frequency: 20 });
-      const gyroSensor = new Gyroscope({ frequency: 20 });
-      
-      accSensor.addEventListener('reading', () => {
-        processSensorTicks(accSensor.x, accSensor.y, accSensor.z, null, null, null);
-      });
-      gyroSensor.addEventListener('reading', () => {
-        processSensorTicks(null, null, null, gyroSensor.x, gyroSensor.y, gyroSensor.z);
-      });
-      
-      accSensor.start();
-      gyroSensor.start();
-      console.log("Modern sensors initialized.");
-      return;
-    } catch (err) {
-      console.warn("Modern sensors blocked/failed, falling back...", err);
-      fallbackDeviceMotion();
-    }
-  } else {
-    // 2. Fallback to DeviceMotion API (iOS / Safari / Older devices)
-    fallbackDeviceMotion();
-  }
-}
-
-function fallbackDeviceMotion() {
-  // iOS 13+ requires explicit permission to read sensors
+  // 1. Bypass modern experimental APIs and go straight to the reliable legacy API
   if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    // iOS 13+ requires explicit permission via a button click
     DeviceMotionEvent.requestPermission()
       .then(state => {
         if (state === 'granted') {
-          window.addEventListener('devicemotion', handleLegacyMotion);
-          console.log("iOS DeviceMotion granted.");
+          window.addEventListener('devicemotion', handleMotion);
+          toast('✅ iPhone Sensors Connected');
         }
       })
       .catch(err => {
-        console.warn("DeviceMotion permission denied or requires user click.", err);
-        // Attach anyway in case it works without prompt
-        window.addEventListener('devicemotion', handleLegacyMotion);
+        console.warn("iOS blocked sensors. Requires user click.", err);
       });
   } else {
-    // Standard non-iOS fallback
-    window.addEventListener('devicemotion', handleLegacyMotion);
-    console.log("Legacy DeviceMotion initialized.");
+    // Android / Standard Browsers
+    window.addEventListener('devicemotion', handleMotion);
+    setTimeout(() => toast('✅ Sensors Connected'), 1500); // Small delay to let UI load
   }
 }
 
-function handleLegacyMotion(e) {
-  // Prefer pure acceleration (excludes gravity). If not available, fallback to including gravity.
-  const acc = e.acceleration || e.accelerationIncludingGravity || { x: 0, y: 0, z: 0 };
+function handleMotion(e) {
+  // 2. The Gravity Fix: If pure acceleration is missing, fallback to raw gravity
+  let acc = e.acceleration;
+  if (!acc || (acc.x === null && acc.y === null)) {
+      acc = e.accelerationIncludingGravity;
+  }
+  
+  // If the phone still returns nothing, abort
+  if (!acc || acc.x === null) return; 
+
   const rot = e.rotationRate || { alpha: 0, beta: 0, gamma: 0 };
-  
   let x = acc.x || 0, y = acc.y || 0, z = acc.z || 0;
-  
-  // Convert rotation to radians to match modern API
+
+  // If we had to use the gravity fallback, mathematically subtract gravity (9.81) from the Z axis
+  if (e.accelerationIncludingGravity && !e.acceleration) {
+      z = z - 9.81;
+  }
+
   const degToRad = Math.PI / 180;
   processSensorTicks(x, y, z, (rot.alpha || 0) * degToRad, (rot.beta || 0) * degToRad, (rot.gamma || 0) * degToRad);
 }
@@ -78,46 +55,38 @@ function processSensorTicks(ax, ay, az, gx, gy, gz) {
   if (crashCooldown) return;
 
   const now = Date.now();
-  if (ax !== null) _lastAcc = { x: ax, y: ay, z: az };
-  if (gx !== null) _lastRot = { x: gx, y: gy, z: gz };
 
-  // Calculate magnitudes (total force)
-  const aMag = Math.sqrt(_lastAcc.x**2 + _lastAcc.y**2 + _lastAcc.z**2);
-  const rotMag = Math.sqrt(_lastRot.x**2 + _lastRot.y**2 + _lastRot.z**2); 
-  
-  // Convert acceleration to G-Force (1G = 9.81 m/s^2)
+  const aMag = Math.sqrt(ax**2 + ay**2 + az**2);
+  const rotMag = Math.sqrt(gx**2 + gy**2 + gz**2); 
   const gForce = aMag / 9.81;
 
   sensorHistory.push({ time: now, aMag, gForce, rotMag });
   sensorHistory = sensorHistory.filter(item => now - item.time <= HISTORY_WINDOW_MS);
-  if (sensorHistory.length < 5) return;
 
-  // Calculate "Jerk" (how fast the acceleration is changing)
-  const prev = sensorHistory[sensorHistory.length - 3];
-  const dt = (now - prev.time) / 1000;
-  const jerk = dt > 0 ? Math.abs(aMag - prev.aMag) / dt : 0;
+  let jerk = 0;
+  if (sensorHistory.length >= 3) {
+      const prev = sensorHistory[sensorHistory.length - 3];
+      const dt = (now - prev.time) / 1000;
+      jerk = dt > 0 ? Math.abs(aMag - prev.aMag) / dt : 0;
+  }
 
-  // Update background UI if those elements exist
   updateSensorUI(gForce, jerk, rotMag);
 
-  // CRASH DETECTION ALGORITHM
-  // Triggers if experiencing > 4 Gs of force AND a massive sudden jerk
-  // We also check if the user is actually moving (gpsSpeed > 10 km/h) to prevent pocket drops from triggering it.
-  if (gForce > 4.0 && jerk > 60 && gpsSpeed > 10) {
+  // Crash detection logic (Shake vigorously to test!)
+  if (gForce > 4.0 && jerk > 60) {
     triggerSOS();
   }
 }
 
 function updateSensorUI(g, j, r) {
-  // If you have a debug panel in your dashboard, this will update it.
-  // Fails silently and safely if the UI elements aren't there.
   const elG = document.getElementById('sv-g');
   const elJ = document.getElementById('sv-j');
   const elR = document.getElementById('sv-r');
 
-  if (elG && g !== null) elG.textContent = `${g.toFixed(2)} G`;
-  if (elJ && j !== null) elJ.textContent = `${Math.round(j)} m/s³`;
-  if (elR && r !== null) elR.textContent = `${Math.round(r * (180 / Math.PI))}°/s`;
+  // Push live values directly to the HTML
+  if (elG) elG.textContent = `${g.toFixed(2)} G`;
+  if (elJ) elJ.textContent = `${Math.round(j)} m/s³`;
+  if (elR) elR.textContent = `${Math.round(r * (180 / Math.PI))}°/s`;
 }
 
 export function triggerSOS() {
@@ -133,7 +102,6 @@ export function triggerSOS() {
   if (num) num.textContent = sosSecs;
   if (ct) ct.textContent = sosSecs;
 
-  // Vibrate phone aggressively if supported
   if ('vibrate' in navigator) navigator.vibrate([500, 200, 500, 200, 1000]);
 
   clearInterval(sosTimer);
@@ -141,11 +109,7 @@ export function triggerSOS() {
     sosSecs--;
     if (num) num.textContent = sosSecs;
     if (ct) ct.textContent = sosSecs;
-    
-    if (sosSecs <= 0) { 
-      clearInterval(sosTimer); 
-      sendSOS(); 
-    }
+    if (sosSecs <= 0) { clearInterval(sosTimer); sendSOS(); }
   }, 1000);
 }
 
@@ -154,8 +118,6 @@ export function cancelSOS() {
   const ov = document.getElementById('sos-ov');
   if (ov) ov.classList.remove('on');
   toast("✅ SOS cancelled. Glad you're safe!");
-  
-  // Prevent immediate re-triggering
   setTimeout(() => { crashCooldown = false; }, 15000); 
 }
 
@@ -163,16 +125,10 @@ function sendSOS() {
   const ov = document.getElementById('sos-ov');
   if (ov) ov.classList.remove('on');
   toast('🆘 Emergency SOS sent to contacts & nearest hospital!');
-  
-  // Cooldown before the system can trigger another crash
   setTimeout(() => { crashCooldown = false; }, 45000);
 }
 
-// Development testing tool
 export function simCrash() {
   toast('⚡ Simulating crash detection…');
-  setTimeout(() => {
-    // Manually force the crash variables regardless of GPS speed
-    if (!crashCooldown) triggerSOS();
-  }, 500);
+  setTimeout(() => { if (!crashCooldown) triggerSOS(); }, 500);
 }
