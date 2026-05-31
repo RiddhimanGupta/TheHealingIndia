@@ -50,3 +50,11 @@ function sendSOS() {
   toast('🆘 Emergency SOS sent to contacts & nearest hospital!');
   setTimeout(() => { crashCooldown = false; }, 45000);
 }
+export function simCrash() {
+  toast('⚡ Simulating crash detection…');
+  // Simulates high G-force and Jerk
+  setTimeout(() => {
+    // If you haven't brought over processSensorTicks, this toast at least proves the button works!
+    triggerSOS(); 
+  }, 500);
+}
