@@ -1,0 +1,30 @@
+/* ===================================================
+   base.css | RESETS & TYPOGRAPHY
+=================================================== */
+*, *::before, *::after { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+  -webkit-tap-highlight-color: transparent; 
+}
+
+html, body {
+  /* Using dvh ensures the UI doesn't break when the mobile browser address bar shows/hides */
+  height: 100dvh; 
+  width: 100%;
+  background: var(--bg);
+  color: var(--t1);
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent pull-to-refresh on mobile */
+  overscroll-behavior-y: none; 
+  touch-action: manipulation;
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 99px; }
+
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.35;} }
