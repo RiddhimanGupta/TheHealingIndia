@@ -19,11 +19,14 @@ function triggerToast(msg) {
 }
 
 export function lookupChallan(val) {
-  let q = val || document.getElementById('reg-inp').value;
-  q = q.toUpperCase().trim();
+  // FIX: If 'val' is a click event (object), ignore it and grab the input box value instead
+  let inputVal = (typeof val === 'string') ? val : document.getElementById('reg-inp').value;
+  let q = inputVal.toUpperCase().trim();
   
   if (!q) { triggerToast("Please enter a vehicle number."); return; }
   if (q.length < 4) { triggerToast("Invalid registration number."); return; }
+
+  // ... rest of the function remains exactly the same ...
 
   const out = document.getElementById('ch-result');
   out.innerHTML = `<div style="text-align:center; padding:40px; color:var(--t2)">
