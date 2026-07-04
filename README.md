@@ -183,9 +183,3 @@ The live platform is a functional preview designed to demonstrate the core exper
 
 
 * Riddhiman Gupta 
-
-
-* Ashita Arora 
-
-
-* Divij Srivastava
