@@ -17,18 +17,7 @@ const AboutScreen: React.FC = () => {
           Building a safer tomorrow for India's delivery heroes.
         </div>
       </div>
-      
-      <div>
-        <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '12px' }}>The Project</div>
-        <div className="card">
-          <p style={{ fontSize: '14px', color: 'var(--text-main)', lineHeight: 1.6, marginBottom: '12px' }}>
-            <strong>THI (The Healing India)</strong> was developed as a submission for the <strong>National Road Safety Hackathon 2026</strong>, hosted by CoERS and RBG Labs at IIT Madras.
-          </p>
-          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            The goal is simple: to deploy a zero-friction safety layer across India's 12 million delivery riders. By building a software-only solution that piggybacks on the tools riders already use, we bypass the adoption hurdles of expensive hardware and standalone apps.
-          </p>
-        </div>
-      </div>
+
 
       <div>
         <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '12px' }}>The Team</div>
